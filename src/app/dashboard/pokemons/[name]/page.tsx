@@ -1,28 +1,38 @@
-import type { Metadata } from 'next'
+import { Metadata } from 'next'
 import Image from 'next/image'
 import { notFound } from 'next/navigation'
-
-import { PokemonByID } from '@/pokemons'
+import { PokemonByName, PokemonsResponse } from '@/pokemons'
 
 interface Props {
   params: {
-    id: string
+    name: string
   }
 }
 
+interface StaticProps {
+  name: string
+}
 
-export async function generateStaticParams() {
-  const static151Pokemons = Array.from({ length: 151 }).map((v, index) => `${ index + 1 }`)
+export async function generateStaticParams(): Promise<StaticProps[]> {
 
-  return static151Pokemons.map(id => ({
-    id: id,
-  }))
+  const static151PokemonsByName = await fetch('https://pokeapi.co/api/v2/pokemon?limit=151', {
+    cache: 'force-cache',
+  })
+  const data: PokemonsResponse = await static151PokemonsByName.json()
+
+  const pokemons = data.results.map( ( pokemon ) => {
+    return {
+      name: pokemon.name
+    }
+  })
+  
+  return pokemons
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   
   try {
-    const { id, name } = await getPokemonById(params.id)
+    const { id, name } = await getPokemonByName(params.name)
   
     const capitalizeName = name.charAt(0).toUpperCase() + name.slice(1)
     return {
@@ -37,13 +47,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 }
 
-const getPokemonById = async (id: string): Promise<PokemonByID> => {
+const getPokemonByName = async (name: string): Promise<PokemonByName> => {
   try {
-    const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${ id }`, {
+    const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${ name }`, {
       cache: 'force-cache',
     })
   
-    const data: PokemonByID = await res.json()
+    const data = await res.json()
     return data
 
   } catch (error) {
@@ -51,8 +61,10 @@ const getPokemonById = async (id: string): Promise<PokemonByID> => {
   }
 }
 
-const PokemonPage = async ({ params }: Props) => {
-  const pokemon = await getPokemonById(params.id)
+const PokemonPageByName = async ({ params }: Props) => {
+  
+  const pokemon = await getPokemonByName(params.name)
+
   return (
     <div className="flex mt-5 flex-col items-center text-slate-800 p-2">
       <div className="relative flex flex-col items-center rounded-[20px] w-[700px] mx-auto bg-white bg-clip-border  shadow-lg  p-3">
@@ -149,4 +161,4 @@ const PokemonPage = async ({ params }: Props) => {
   )
 }
 
-export default PokemonPage
+export default PokemonPageByName
