@@ -19,7 +19,9 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body className={inter.className}>
-        <PokemonsProvider>{children}</PokemonsProvider>
+        <PokemonsProvider>
+          {children}
+        </PokemonsProvider>
       </body>
     </html>
   )

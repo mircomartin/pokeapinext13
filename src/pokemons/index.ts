@@ -7,3 +7,4 @@ export type { PokemonByName } from './interfaces/pokemonByName-response'
 //Components
 export { PokemonGrid } from './components/PokemonGrid'
 export { PokemonCard } from './components/PokemonCard'
+export { PokemonFavorites } from './components/PokemonFavorites'
